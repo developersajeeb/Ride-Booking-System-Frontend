@@ -1,4 +1,5 @@
 import App from "@/App";
+import RiderLayout from "@/components/layouts/RiderLayout";
 import AboutUs from "@/pages/about-us/AboutUs";
 import Contact from "@/pages/contact/Contact";
 import Faq from "@/pages/faq/Faq";
@@ -6,7 +7,12 @@ import Features from "@/pages/features/Features";
 import Home from "@/pages/home/Home";
 import LoginPage from "@/pages/login/LoginPage";
 import RegistrationPage from "@/pages/registration/RegistrationPage";
-import { createBrowserRouter } from "react-router";
+import { generateRoutes } from "@/utils/generateRoutes";
+import { createBrowserRouter, Navigate } from "react-router";
+import { riderSidebarMenus } from "./riderSidebarMenus";
+import { withAuth } from "@/utils/withAuth";
+import { role } from "@/constants/role";
+import type { TRole } from "@/types";
 
 
 export const router = createBrowserRouter([
@@ -49,14 +55,14 @@ export const router = createBrowserRouter([
         ],
     },
 
-    //   {
-    //     Component: withAuth(UserLayout, role.user as TRole),
-    //     path: "/user",
-    //     children: [
-    //       { index: true, element: <Navigate to="/user/dashboard" /> },
-    //       ...generateRoutes(userSidebarMenus),
-    //     ],
-    //   },
+      {
+        Component: withAuth(RiderLayout, role.rider as TRole),
+        path: "/rider",
+        children: [
+          { index: true, element: <Navigate to="/rider/dashboard" /> },
+          ...generateRoutes(riderSidebarMenus),
+        ],
+      },
 
     //   {
     //     Component: withAuth(AdminLayout, role.superAdmin as TRole),
