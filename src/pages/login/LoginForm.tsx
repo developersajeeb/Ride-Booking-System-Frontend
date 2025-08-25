@@ -109,7 +109,7 @@ export function LoginForm({
                                 </FormItem>
                             )}
                         />
-                        <Button disabled={isLoginBtnLoading} type="submit" className={`tp-primary-btn h-11 !rounded-lg mt-3 text-white ${isLoginBtnLoading && 'pointer-events-none'}`}>
+                        <Button disabled={isLoginBtnLoading} type="submit" className={`h-11 !rounded-lg mt-3 text-white ${isLoginBtnLoading && 'pointer-events-none'}`}>
                             {isLoginBtnLoading && <RiLoaderLine className="w-4 h-4 animate-spin" />} Login
                         </Button>
                         <div className="text-center">
