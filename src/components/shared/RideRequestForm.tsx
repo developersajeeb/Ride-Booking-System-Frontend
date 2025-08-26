@@ -13,14 +13,11 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { RiLoaderLine } from "react-icons/ri";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 
 type DistanceInputProps = {
   field: ControllerRenderProps<
-    {
-      pickupLocation: string;
-      destination: string;
-      distanceInKm: string;
-    },
+    z.infer<typeof registerSchema>, 
     "distanceInKm"
   >;
 };
@@ -100,6 +97,10 @@ const registerSchema = z.object({
     },
     { message: "Distance must be a number between 0.2 and 250 km." }
   ),
+
+  paymentMethod: z.enum(["cash", "digital_payment"], {
+    message: "Payment Method is required.",
+  }),
 });
 
 const RideRequestForm = () => {
@@ -110,6 +111,7 @@ const RideRequestForm = () => {
       pickupLocation: "",
       destination: "",
       distanceInKm: "",
+      paymentMethod: "cash",
     },
   });
 
@@ -119,7 +121,7 @@ const RideRequestForm = () => {
     distance && !isNaN(Number(distance))
       ? parseFloat((Number(distance) * farePerKm).toFixed(2))
       : 0;
-  
+
   const onSubmit = async (data: z.infer<typeof registerSchema>) => {
     console.log(data, "reg data");
     setIsLoginBtnLoading(true);
@@ -156,7 +158,7 @@ const RideRequestForm = () => {
           Start your Ride
         </h4>
         <div>
-          <div className="flex flex-col md:flex-row w-full gap-5">
+          <div className="flex flex-col lg:flex-row w-full gap-5">
             <FormField
               control={form.control}
               rules={{ required: "Pickup Location is required" }}
@@ -226,8 +228,43 @@ const RideRequestForm = () => {
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              rules={{ required: "Payment method is required" }}
+              name="paymentMethod"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <Label
+                    className="font-medium text-gray-600 dark:text-gray-400 text-sm"
+                    htmlFor="paymentMethod"
+                  >
+                    Payment Method<span className="text-red-500">*</span>
+                  </Label>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      className="flex flex-wrap gap-4"
+                    >
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value="cash" id="r1" />
+                        <Label htmlFor="r1">Cash</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value="digital_payment" id="r2" />
+                        <Label htmlFor="r2">Digital Payment</Label>
+                      </div>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-          <p className="text-center mt-5 text-2xl font-semibold">Total {totalFare} tk</p>
+          <p className="text-center mt-5 text-2xl font-semibold">
+            Total {totalFare} tk
+          </p>
           <div className="text-center mt-4">
             <Button
               disabled={isLoginBtnLoading}

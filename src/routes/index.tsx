@@ -13,6 +13,7 @@ import { riderSidebarMenus } from "./riderSidebarMenus";
 import { withAuth } from "@/utils/withAuth";
 import { role } from "@/constants/role";
 import type { TRole } from "@/types";
+import NoteFound from "@/pages/not-found/NoteFound";
 
 
 export const router = createBrowserRouter([
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
         Component: App,
         path: "/",
         children: [
+            { path: "*", element: <NoteFound /> },
             {
                 index: true,
                 Component: Home,
@@ -59,6 +61,7 @@ export const router = createBrowserRouter([
         Component: withAuth(RiderLayout, role.rider as TRole),
         path: "/rider",
         children: [
+          { path: "*", element: <NoteFound /> },
           { index: true, element: <Navigate to="/rider/dashboard" /> },
           ...generateRoutes(riderSidebarMenus),
         ],
