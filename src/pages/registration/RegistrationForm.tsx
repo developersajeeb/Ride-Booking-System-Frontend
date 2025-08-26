@@ -12,6 +12,9 @@ import { config } from "@/config"
 import { useState } from "react"
 import z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { RiLoaderLine } from "react-icons/ri"
+import { Select } from "@radix-ui/react-select"
+import { SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const registerSchema = z
     .object({
@@ -32,6 +35,10 @@ const registerSchema = z
             .email({ message: "Invalid email address format." })
             .min(5, { message: "Email must be at least 5 characters long." })
             .max(100, { message: "Email cannot exceed 100 characters." }),
+        role: z.enum(["RIDER", "DRIVER"], { required_error: "Select a role." }),
+        vehicleType: z.enum(["BIKE", "CAR"]).optional(),
+        vehicleNumber: z.string().optional(),
+        licenseNumber: z.string().optional(),
         password: z
             .string()
             .nonempty({ message: "Password is required." })
@@ -50,6 +57,12 @@ const registerSchema = z
             .nonempty({ message: "Confirm Password is required." })
             .min(6, { error: "Confirm Password is too short" }),
     })
+    .refine((data) => {
+        if (data.role === "DRIVER") {
+            return data.phone && data.vehicleType && data.vehicleNumber && data.licenseNumber;
+        }
+        return true;
+    }, { message: "Driver fields are required", path: ["phone"] })
     .refine((data) => data.password === data.confirmPassword, {
         message: "Password do not match",
         path: ["confirmPassword"],
@@ -71,25 +84,38 @@ export function RegistrationForm({
             phone: "",
             password: "",
             confirmPassword: "",
+            role: "RIDER",
+            vehicleType: "",
+            vehicleNumber: "",
+            licenseNumber: "",
         },
     });
 
     const onSubmit = async (data: z.infer<typeof registerSchema>) => {
-        console.log(data, 'reg data');
         setIsLoginBtnLoading(true);
 
-        const userInfo = {
+        // Prepare payload dynamically based on role
+        const userInfo: any = {
             name: data.name,
             email: data.email,
-            phone: data.phone,
             password: data.password,
+            role: data.role, // Include role
         };
+
+        // If Driver, add extra fields
+        if (data.role === "DRIVER") {
+            userInfo.phone = data.phone;
+            userInfo.vehicleType = data.vehicleType;
+            userInfo.vehicleNumber = data.vehicleNumber;
+            userInfo.licenseNumber = data.licenseNumber;
+        }
 
         try {
             const result = await register(userInfo).unwrap();
             console.log(result);
             toast.success("Account created successfully!");
-            navigate("/verify");
+            form.reset();
+            navigate("/");
         } catch (error: object | any) {
             toast.error(error?.data?.message || "Something went wrong. Please try again.");
             console.error(error);
@@ -115,7 +141,7 @@ export function RegistrationForm({
                                 control={form.control}
                                 name="name"
                                 render={({ field }) => (
-                                    <FormItem className="space-y-1">
+                                    <FormItem>
                                         <Label className="font-semibold text-gray-600 dark:text-gray-400 text-sm" htmlFor="name">Name<span className="text-destructive text-base">*</span></Label>
                                         <FormControl>
                                             <Input className="dark:text-white" placeholder="Your name" {...field} />
@@ -132,7 +158,7 @@ export function RegistrationForm({
                                 control={form.control}
                                 name="phone"
                                 render={({ field }) => (
-                                    <FormItem className="space-y-1">
+                                    <FormItem>
                                         <Label className="font-semibold text-gray-600 dark:text-gray-400 text-sm" htmlFor="phone">Phone<span className="text-destructive text-base">*</span></Label>
                                         <FormControl>
                                             <Input className="dark:text-white" placeholder="01XXXXXXXXX" {...field} />
@@ -146,28 +172,116 @@ export function RegistrationForm({
                             />
                         </div>
 
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem className="space-y-1">
-                                    <Label className="font-semibold text-gray-600 dark:text-gray-400 text-sm" htmlFor="email">Email<span className="text-destructive text-base">*</span></Label>
-                                    <FormControl>
-                                        <Input className="dark:text-white" placeholder="m@example.com" {...field} />
-                                    </FormControl>
-                                    <FormDescription className="sr-only">
-                                        This is your email.
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
+                        <div className="grid sm:grid-cols-2 gap-3">
+                            <FormField
+                                control={form.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <Label className="font-semibold text-gray-600 dark:text-gray-400 text-sm" htmlFor="email">Email<span className="text-destructive text-base">*</span></Label>
+                                        <FormControl>
+                                            <Input className="dark:text-white" placeholder="m@example.com" {...field} />
+                                        </FormControl>
+                                        <FormDescription className="sr-only">
+                                            This is your email.
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="role"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <Label>Join as?<span className="text-destructive">*</span></Label>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <SelectTrigger className="w-[180px]">
+                                                <SelectValue placeholder="Select role" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectGroup>
+                                                    <SelectItem value="RIDER">Rider</SelectItem>
+                                                    <SelectItem value="DRIVER">Driver</SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {form.watch("role") === "DRIVER" && (
+                                <>
+                                    <FormField
+                                        control={form.control}
+                                        name="phone"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <Label>Phone *</Label>
+                                                <FormControl><Input {...field} placeholder="01XXXXXXXXX" /></FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="vehicleType"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <Label>Vehicle Type *</Label>
+                                                <Select onValueChange={field.onChange} value={field.value || ""}>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select vehicle type" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectItem value="BIKE">Bike</SelectItem>
+                                                            <SelectItem value="CAR">Car</SelectItem>
+                                                            <SelectItem value="OTHER">Other</SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="vehicleNumber"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <Label>Vehicle Number *</Label>
+                                                <FormControl><Input {...field} /></FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="licenseNumber"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <Label>License Number *</Label>
+                                                <FormControl><Input {...field} /></FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </>
                             )}
-                        />
+                        </div>
+
                         <div className="grid sm:grid-cols-2 gap-3">
                             <FormField
                                 control={form.control}
                                 name="password"
                                 render={({ field }) => (
-                                    <FormItem className="space-y-1">
+                                    <FormItem>
                                         <Label className="font-semibold text-gray-600 dark:text-gray-400 text-sm" htmlFor="password">Password<span className="text-destructive text-base">*</span></Label>
                                         <FormControl>
                                             <Input type="password" className="dark:text-white" placeholder="Your password" {...field} />
@@ -183,7 +297,7 @@ export function RegistrationForm({
                                 control={form.control}
                                 name="confirmPassword"
                                 render={({ field }) => (
-                                    <FormItem className="space-y-1">
+                                    <FormItem>
                                         <Label className="font-semibold text-gray-600 dark:text-gray-400 text-sm" htmlFor="confirmPassword">Confirm Password<span className="text-destructive text-base">*</span></Label>
                                         <FormControl>
                                             <Input type="password" className="dark:text-white" placeholder="Re-type password" {...field} />
@@ -196,8 +310,8 @@ export function RegistrationForm({
                                 )}
                             />
                         </div>
-                        <Button type="submit" className={`h-11 !rounded-lg mt-3 text-white ${isLoginBtnLoading && 'pointer-events-none'}`}>
-                            Sign Up
+                        <Button type="submit" className={`h-11 !rounded-lg mt-3 text-white cursor-pointer ${isLoginBtnLoading && 'pointer-events-none'}`}>
+                            {isLoginBtnLoading && <RiLoaderLine className="w-4 h-4 animate-spin" />} Sign Up
                         </Button>
 
                         <div className="text-center">
@@ -217,9 +331,9 @@ export function RegistrationForm({
                             </Button>
                         </div>
                         <div className="text-center text-base dark:text-white">
-                            Don&apos;t have an account?{" "}
-                            <Link to="/registration" className="underline underline-offset-4 hover:text-primary-500 duration-300">
-                                Sign up
+                            Already have an account?{" "}
+                            <Link to="/login" className="underline underline-offset-4 hover:text-primary-500 duration-300">
+                                Login
                             </Link>
                         </div>
                     </div>

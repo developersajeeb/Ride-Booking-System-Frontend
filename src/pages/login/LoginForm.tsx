@@ -26,6 +26,7 @@ export function LoginForm({
             const res = await login(data).unwrap();
             console.log(res);
             toast.success('Login Successfully');
+            form.reset();
             navigate('/')
             setIsLoginBtnLoading(false);
         } catch (err) {
@@ -42,7 +43,7 @@ export function LoginForm({
             
              if (error.data.message === "User is not verified") {
                 toast.error("Your account is not verified");
-                navigate("/verify", { state: data.email });
+                navigate("/");
             }
         } finally {
             setIsLoginBtnLoading(false);
