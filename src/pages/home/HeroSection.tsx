@@ -63,7 +63,7 @@ const HeroSection = ({
             {description}
           </p>
         </div>
-        <Button asChild size="lg" className="mt-10">
+        <Button asChild size="lg" className="mt-10 text-white">
           <Link to={button.url}>{button.text}</Link>
         </Button>
         <div className="mx-auto mt-10 flex w-fit flex-col items-center gap-4 sm:flex-row">
