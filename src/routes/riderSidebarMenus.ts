@@ -1,6 +1,5 @@
-
-import RideHistory from "@/pages/ride-history/RideHistory";
-import RideRequest from "@/pages/ride-request/RideRequest";
+import RideHistory from "@/pages/rider/ride-history/RideHistory";
+import RideRequest from "@/pages/rider/ride-request/RideRequest";
 import RiderDashboard from "@/pages/rider/rider-dashboard/RiderDashboard";
 import type { ISidebarItem } from "@/types";
 

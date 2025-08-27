@@ -1,4 +1,4 @@
-import type { ComponentType } from "react";
+import type { ComponentType, Key } from "react";
 import type { IconType } from "react-icons/lib";
 
 export interface ISidebarItem {
@@ -37,4 +37,34 @@ export interface IErrorResponse {
     name: string;
   };
   stack?: string;
+}
+
+export type RideStatus =
+  | "REQUESTED"
+  | "ACCEPTED"
+  | "IN_PROGRESS"
+  | "COMPLETED"
+  | "CANCELLED";
+
+export interface IRide {
+  _id: Key | null | undefined;
+  rider: string;
+  riderName: string;
+  riderEmail: string;
+  riderPhone?: string;
+  pickupLocation: string;
+  destination: string;
+  status: RideStatus;
+  driver?: string;
+  driverName?: string;
+  driverEmail?: string;
+  driverPhone?: string;
+  fare?: number;
+  requestedAt: string;
+  acceptedAt?: string;
+  pickedUpAt?: string;
+  completedAt?: string;
+  cancelledAt?: string;
+  distanceInKm?: number;
+  paymentMethod?: "cash" | "digital_payment";
 }

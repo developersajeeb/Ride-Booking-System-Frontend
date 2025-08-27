@@ -23,7 +23,7 @@ export function RiderSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar {...props} className="relative">
+    <Sidebar {...props} className="relative fixed">
       <SidebarHeader>
         <Link
           to="/"

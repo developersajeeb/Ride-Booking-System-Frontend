@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useForm, type ControllerRenderProps } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,10 +15,12 @@ import { Button } from "../ui/button";
 import { useState } from "react";
 import { RiLoaderLine } from "react-icons/ri";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { useRequestRideMutation } from "@/redux/features/ride/ride.api";
+import { toast } from "sonner";
 
 type DistanceInputProps = {
   field: ControllerRenderProps<
-    z.infer<typeof registerSchema>, 
+    z.infer<typeof registerSchema>,
     "distanceInKm"
   >;
 };
@@ -105,6 +108,7 @@ const registerSchema = z.object({
 
 const RideRequestForm = () => {
   const [isLoginBtnLoading, setIsLoginBtnLoading] = useState<boolean>(false);
+  const [requestRide] = useRequestRideMutation();
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -126,26 +130,26 @@ const RideRequestForm = () => {
     console.log(data, "reg data");
     setIsLoginBtnLoading(true);
 
-    // const userInfo = {
-    //   name: data.name,
-    //   email: data.email,
-    //   phone: data.phone,
-    //   password: data.password,
-    // };
+    const payload = {
+      pickupLocation: data.pickupLocation,
+      destination: data.destination,
+      distanceInKm: parseFloat(data.distanceInKm),
+      paymentMethod: data.paymentMethod,
+    };
 
-    // try {
-    //   const result = await register(userInfo).unwrap();
-    //   console.log(result);
-    //   toast.success("Account created successfully!");
-    //   navigate("/verify");
-    // } catch (error: object | any) {
-    //   toast.error(
-    //     error?.data?.message || "Something went wrong. Please try again."
-    //   );
-    //   console.error(error);
-    // } finally {
-    //   setIsLoginBtnLoading(false);
-    // }
+    console.log(payload, "ride request data");
+
+    try {
+      const result = await requestRide(payload).unwrap();
+      toast.success("Ride requested successfully! Please wait for driver to accept your request.");
+      form.reset();
+      console.log(result);
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Something went wrong! Please try again.");
+      console.error("Ride request error:", error);
+    } finally {
+      setIsLoginBtnLoading(false);
+    }
   };
 
   return (
@@ -229,38 +233,40 @@ const RideRequestForm = () => {
               )}
             />
 
-            <FormField
-              control={form.control}
-              rules={{ required: "Payment method is required" }}
-              name="paymentMethod"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <Label
-                    className="font-medium text-gray-600 dark:text-gray-400 text-sm"
-                    htmlFor="paymentMethod"
-                  >
-                    Payment Method<span className="text-red-500">*</span>
-                  </Label>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      className="flex flex-wrap gap-4"
+            <div className="w-full">
+              <FormField
+                control={form.control}
+                rules={{ required: "Payment method is required" }}
+                name="paymentMethod"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <Label
+                      className="font-medium text-gray-600 dark:text-gray-400 text-sm"
+                      htmlFor="paymentMethod"
                     >
-                      <div className="flex items-center gap-2">
-                        <RadioGroupItem value="cash" id="r1" />
-                        <Label htmlFor="r1">Cash</Label>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <RadioGroupItem value="digital_payment" id="r2" />
-                        <Label htmlFor="r2">Digital Payment</Label>
-                      </div>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                      Payment Method<span className="text-red-500">*</span>
+                    </Label>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        className="flex flex-wrap gap-4"
+                      >
+                        <div className="flex items-center gap-2">
+                          <RadioGroupItem value="cash" id="r1" />
+                          <Label htmlFor="r1">Cash</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <RadioGroupItem value="digital_payment" id="r2" />
+                          <Label htmlFor="r2">Digital Payment</Label>
+                        </div>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
           <p className="text-center mt-5 text-2xl font-semibold">
             Total {totalFare} tk
@@ -269,9 +275,8 @@ const RideRequestForm = () => {
             <Button
               disabled={isLoginBtnLoading}
               type="submit"
-              className={`h-11 !rounded-lg mt-3 text-white cursor-pointer ${
-                isLoginBtnLoading && "pointer-events-none"
-              }`}
+              className={`h-11 !rounded-lg mt-3 text-white cursor-pointer ${isLoginBtnLoading && "pointer-events-none"
+                }`}
             >
               {isLoginBtnLoading && (
                 <RiLoaderLine className="w-4 h-4 animate-spin" />
