@@ -1,10 +1,14 @@
-import { Outlet } from "react-router";
+import { Link, Outlet } from "react-router";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "../ui/sidebar";
 import { RiderSidebar } from "../shared/RiderSidebar";
 import { Separator } from "../ui/separator";
 import { ModeToggle } from "../shared/ModeToggler";
+import { useUserInfoQuery } from "@/redux/features/auth/auth.api";
+import { FaRegUser } from "react-icons/fa";
 
 const RiderLayout = () => {
+  const { data } = useUserInfoQuery(undefined);
+
   return (
     <SidebarProvider>
       <RiderSidebar />
@@ -18,7 +22,12 @@ const RiderLayout = () => {
             />
           </div>
 
-          <ModeToggle />
+          <div className="flex gap-3">
+            {data?.data?.email && (
+              <Link to="/rider/my-profile" className="w-9 h-9 flex items-center justify-center bg-gray-50 dark:bg-[#1b1b1d] bg border rounded-md"><FaRegUser /></Link>
+            )}
+            <ModeToggle />
+          </div>
         </header>
 
         <main className="px-5 py-5 bg-[#F1F5FF] dark:bg-black min-h-full">

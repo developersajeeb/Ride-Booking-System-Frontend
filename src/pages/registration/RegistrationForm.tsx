@@ -126,8 +126,6 @@ export function RegistrationForm({
   });
 
   const onSubmit = async (data: z.infer<typeof registerSchema>) => {
-    console.log(data);
-
     setIsLoginBtnLoading(true);
 
     const userInfo: any = {
