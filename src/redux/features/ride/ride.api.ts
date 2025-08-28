@@ -1,4 +1,4 @@
- 
+
 import { baseApi } from "../baseApi";
 
 export const rideApi = baseApi.injectEndpoints({
@@ -19,6 +19,15 @@ export const rideApi = baseApi.injectEndpoints({
       }),
       providesTags: ["RIDE"],
     }),
+
+    updateProfileInfo: builder.mutation({
+      query: (userInfo) => ({
+        url: "/user/update-my-profile",
+        method: "PATCH",
+        data: userInfo,
+      }),
+      invalidatesTags: ["USER"],
+    }),
   }),
   overrideExisting: false,
 });
@@ -26,4 +35,5 @@ export const rideApi = baseApi.injectEndpoints({
 export const {
   useRequestRideMutation,
   useUserAllRidesQuery,
+  useUpdateProfileInfoMutation
 } = rideApi;

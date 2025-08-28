@@ -1,10 +1,88 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useUserInfoQuery } from "@/redux/features/auth/auth.api";
+import { useUpdateProfileInfoMutation } from "@/redux/features/ride/ride.api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { FaRegUser } from "react-icons/fa";
+import { RiLoaderLine } from "react-icons/ri";
 import { RxCross2 } from "react-icons/rx";
+import { toast } from "sonner";
+import z from "zod";
+
+const updateProfileSchema = z
+  .object({
+    name: z
+      .string()
+      .nonempty({ message: "Name is required." })
+      .min(2, { message: "At least 2 characters long." })
+      .max(50, { message: "Name cannot exceed 50 characters." }),
+    phone: z
+      .string()
+      .nonempty({ message: "Phone number is required." })
+      .regex(/^(?:\+8801\d{9}|01\d{9})$/, {
+        message: "Phone number Invalid.",
+      }),
+    password: z
+      .string()
+      .optional()
+      .refine((val) => !val || val.length >= 6, {
+        message: "Password at least 6 characters long.",
+      })
+      .refine((val) => !val || /^(?=.*[A-Z])/.test(val), {
+        message: "Password must contain at least 1 uppercase letter.",
+      })
+      .refine((val) => !val || /^(?=.*[!@#$%^&*])/.test(val), {
+        message: "Password must contain at least 1 special character.",
+      })
+      .refine((val) => !val || /^(?=.*\d)/.test(val), {
+        message: "Password must contain at least 1 number.",
+      }),
+  })
 
 const RiderProfile = () => {
   const { data } = useUserInfoQuery(undefined);
-  console.log(data?.data);
+  const [updateProfileInfo] = useUpdateProfileInfoMutation();
+  const [isLoginBtnLoading, setIsLoginBtnLoading] = useState<boolean>(false);
+
+  const form = useForm<z.infer<typeof updateProfileSchema>>({
+    resolver: zodResolver(updateProfileSchema),
+    defaultValues: {
+      name: data?.data?.name || "",
+      phone: data?.data?.phone || "",
+      password: "",
+    },
+  });
+
+  const onSubmit = async (values: z.infer<typeof updateProfileSchema>) => {
+    setIsLoginBtnLoading(true);
+    try {
+      const payload: any = {
+        name: values.name,
+        phone: values.phone,
+      };
+      if (values.password) payload.password = values.password;
+
+      const res = await updateProfileInfo(payload).unwrap();
+      toast.success("Profile Updated Successfully");
+
+      form.reset({
+        name: res?.data?.name || values.name,
+        phone: res?.data?.phone || values.phone,
+        password: "",
+      });
+    } catch (err: any) {
+      console.error(err);
+      const msg = err?.data?.message || "Failed to update profile";
+      toast.error(msg);
+    } finally {
+      setIsLoginBtnLoading(false);
+    }
+  };
 
   return (
     <section>
@@ -34,6 +112,48 @@ const RiderProfile = () => {
       <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
         {data?.data?.email}
       </p>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 max-w-56">
+          <FormField
+            control={form.control}
+            rules={{ required: "Password is required" }}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <Label
+                  className="font-semibold text-gray-600 dark:text-gray-400 text-sm"
+                  htmlFor="password"
+                >
+                  New Password
+                </Label>
+                <FormControl>
+                  <Input
+                    className="dark:text-white"
+                    placeholder="Enter new password"
+                    type="password"
+                    {...field}
+                    value={field.value || ""}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button
+            disabled={isLoginBtnLoading}
+            type="submit"
+            className={`w-full !rounded-lg mt-3 text-white cursor-pointer ${isLoginBtnLoading && "pointer-events-none"
+              }`}
+          >
+            {isLoginBtnLoading && (
+              <RiLoaderLine className="animate-spin" />
+            )}{" "}
+            Set new password
+          </Button>
+        </form>
+      </Form>
     </section>
   );
 };
