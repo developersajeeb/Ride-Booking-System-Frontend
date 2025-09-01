@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { IRide } from "@/types";
 import { baseApi } from "../baseApi";
 
 export const rideApi = baseApi.injectEndpoints({
@@ -11,15 +13,19 @@ export const rideApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["RIDE"],
     }),
-    userAllRides: builder.query({
-      query: ({ page = 1, limit = 10, search = "", status = "" }) => ({
+
+    userAllRides: builder.query<{ data: IRide[]; meta: any }, Record<string, any>>({
+      query: (params) => ({
         url: "/rides/rider-history",
         method: "GET",
-        params: { page, limit, search, status },
+        params: params,
       }),
       providesTags: ["RIDE"],
+      transformResponse: (response: { data: { data: IRide[]; meta: any } }) => ({
+        data: response.data.data, 
+        meta: response.data.meta,
+      }),
     }),
-
     updateProfileInfo: builder.mutation({
       query: (userInfo) => ({
         url: "/user/update-my-profile",

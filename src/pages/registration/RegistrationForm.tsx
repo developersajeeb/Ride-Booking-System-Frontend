@@ -131,6 +131,7 @@ export function RegistrationForm({
     const userInfo: any = {
       name: data.name,
       email: data.email,
+      phone: data.phone,
       password: data.password,
       role: data.role,
     };
@@ -143,8 +144,8 @@ export function RegistrationForm({
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const result = await register(userInfo).unwrap();
-      console.log(result);
       toast.success("Account created successfully!");
       form.reset();
       navigate("/");
@@ -415,9 +416,8 @@ export function RegistrationForm({
             </div>
             <Button
               type="submit"
-              className={`h-11 !rounded-lg mt-3 text-white cursor-pointer ${
-                isLoginBtnLoading && "pointer-events-none"
-              }`}
+              className={`h-11 !rounded-lg mt-3 text-white cursor-pointer ${isLoginBtnLoading && "pointer-events-none"
+                }`}
             >
               {isLoginBtnLoading && (
                 <RiLoaderLine className="w-4 h-4 animate-spin" />

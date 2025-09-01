@@ -48,6 +48,7 @@ const RiderProfile = () => {
   const { data } = useUserInfoQuery(undefined);
   const [updateProfileInfo] = useUpdateProfileInfoMutation();
   const [isLoginBtnLoading, setIsLoginBtnLoading] = useState<boolean>(false);
+  const [profileEditForm, setProfileEditForm] = useState<boolean>(false);
 
   const form = useForm<z.infer<typeof updateProfileSchema>>({
     resolver: zodResolver(updateProfileSchema),
@@ -69,7 +70,7 @@ const RiderProfile = () => {
 
       const res = await updateProfileInfo(payload).unwrap();
       toast.success("Profile Updated Successfully");
-
+      setProfileEditForm(false);
       form.reset({
         name: res?.data?.name || values.name,
         phone: res?.data?.phone || values.phone,
@@ -112,48 +113,97 @@ const RiderProfile = () => {
       <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
         {data?.data?.email}
       </p>
+      <Button onClick={() => setProfileEditForm(!profileEditForm)} className="text-white cursor-pointer mt-5">Edit Profile</Button>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 max-w-56">
-          <FormField
-            control={form.control}
-            rules={{ required: "Password is required" }}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <Label
-                  className="font-semibold text-gray-600 dark:text-gray-400 text-sm"
-                  htmlFor="password"
-                >
-                  New Password
-                </Label>
-                <FormControl>
-                  <Input
-                    className="dark:text-white"
-                    placeholder="Enter new password"
-                    type="password"
-                    {...field}
-                    value={field.value || ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      {profileEditForm && (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 max-w-56 space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <Label
+                    className="font-semibold text-gray-600 dark:text-gray-400 text-sm"
+                    htmlFor="name"
+                  >
+                    Name<span className="text-destructive text-base">*</span>
+                  </Label>
+                  <FormControl>
+                    <Input
+                      className="dark:text-white"
+                      placeholder="Your name"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <Button
-            disabled={isLoginBtnLoading}
-            type="submit"
-            className={`w-full !rounded-lg mt-3 text-white cursor-pointer ${isLoginBtnLoading && "pointer-events-none"
-              }`}
-          >
-            {isLoginBtnLoading && (
-              <RiLoaderLine className="animate-spin" />
-            )}{" "}
-            Set new password
-          </Button>
-        </form>
-      </Form>
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <Label
+                    className="font-semibold text-gray-600 dark:text-gray-400 text-sm"
+                    htmlFor="phone"
+                  >
+                    Phone<span className="text-destructive text-base">*</span>
+                  </Label>
+                  <FormControl>
+                    <Input
+                      className="dark:text-white"
+                      placeholder="01XXXXXXXXX"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              rules={{ required: "Password is required" }}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <Label
+                    className="font-semibold text-gray-600 dark:text-gray-400 text-sm"
+                    htmlFor="password"
+                  >
+                    New Password
+                  </Label>
+                  <FormControl>
+                    <Input
+                      className="dark:text-white"
+                      placeholder="Enter new password"
+                      type="password"
+                      {...field}
+                      value={field.value || ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button
+              disabled={isLoginBtnLoading}
+              type="submit"
+              className={`w-full !rounded-lg text-white cursor-pointer ${isLoginBtnLoading && "pointer-events-none"
+                }`}
+            >
+              {isLoginBtnLoading && (
+                <RiLoaderLine className="animate-spin" />
+              )}{" "}
+              Update
+            </Button>
+          </form>
+        </Form>
+      )}
     </section>
   );
 };

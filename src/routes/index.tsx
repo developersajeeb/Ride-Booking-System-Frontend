@@ -1,5 +1,6 @@
 import App from "@/App";
 import RiderLayout from "@/components/layouts/RiderLayout";
+import DriverLayout from "@/components/layouts/DriverLayout";
 import AboutUs from "@/pages/about-us/AboutUs";
 import Contact from "@/pages/contact/Contact";
 import Faq from "@/pages/faq/Faq";
@@ -14,7 +15,7 @@ import { withAuth } from "@/utils/withAuth";
 import { role } from "@/constants/role";
 import type { TRole } from "@/types";
 import NoteFound from "@/pages/not-found/NoteFound";
-
+import { driverSidebarMenus } from "./driverSidebarMenus";
 
 export const router = createBrowserRouter([
     {
@@ -50,30 +51,26 @@ export const router = createBrowserRouter([
                 Component: RegistrationPage,
                 path: "registration"
             }
-            //   {
-            //     Component: withAuth(Booking),
-            //     path: "booking/:slug",
-            //   },
         ],
     },
 
-      {
+    {
         Component: withAuth(RiderLayout, role.rider as TRole),
         path: "/rider",
         children: [
-          { index: true, element: <Navigate to="/rider/dashboard" /> },
-          ...generateRoutes(riderSidebarMenus),
+            { index: true, element: <Navigate to="/rider/dashboard" /> },
+            ...generateRoutes(riderSidebarMenus),
         ],
-      },
-
-    //   {
-    //     Component: withAuth(AdminLayout, role.superAdmin as TRole),
-    //     path: "/admin",
-    //     children: [
-    //       { index: true, element: <Navigate to="/admin/dashboard" /> },
-    //       ...generateRoutes(adminSidebarMenus),
-    //     ],
-    //   },
+    },
+    
+    {
+        Component: withAuth(DriverLayout, role.driver as TRole),
+        path: "/driver",
+        children: [
+            { index: true, element: <Navigate to="/driver/dashboard" /> },
+            ...generateRoutes(driverSidebarMenus),
+        ],
+    },
 
 
 ]);

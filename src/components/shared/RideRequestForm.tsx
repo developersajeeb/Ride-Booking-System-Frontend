@@ -17,6 +17,15 @@ import { RiLoaderLine } from "react-icons/ri";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { useRequestRideMutation } from "@/redux/features/ride/ride.api";
 import { toast } from "sonner";
+import { useUserInfoQuery } from "@/redux/features/auth/auth.api";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type DistanceInputProps = {
   field: ControllerRenderProps<
@@ -81,6 +90,8 @@ const DistanceInput = ({ field }: DistanceInputProps) => {
 };
 
 const registerSchema = z.object({
+  vehicleType: z.string().nonempty({ message: "Vehicle Type is required." }),
+
   pickupLocation: z
     .string()
     .nonempty({ message: "Pickup Location is required." })
@@ -108,10 +119,12 @@ const registerSchema = z.object({
 
 const RideRequestForm = () => {
   const [isLoginBtnLoading, setIsLoginBtnLoading] = useState<boolean>(false);
+  const { data: userData } = useUserInfoQuery(undefined);
   const [requestRide] = useRequestRideMutation();
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
+      vehicleType: "",
       pickupLocation: "",
       destination: "",
       distanceInKm: "",
@@ -127,17 +140,19 @@ const RideRequestForm = () => {
       : 0;
 
   const onSubmit = async (data: z.infer<typeof registerSchema>) => {
-    console.log(data, "reg data");
     setIsLoginBtnLoading(true);
+    if (!userData) {
+      toast.error("Please login or signup to request a ride.");
+      return
+    }
 
     const payload = {
+      vehicleType: data.vehicleType,
       pickupLocation: data.pickupLocation,
       destination: data.destination,
       distanceInKm: parseFloat(data.distanceInKm),
       paymentMethod: data.paymentMethod,
     };
-
-    console.log(payload, "ride request data");
 
     try {
       const result = await requestRide(payload).unwrap();
@@ -163,6 +178,30 @@ const RideRequestForm = () => {
         </h4>
         <div>
           <div className="flex flex-col lg:flex-row w-full gap-5">
+            <FormField
+              control={form.control}
+              name="vehicleType"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <Label className="font-semibold text-gray-600 dark:text-gray-400 text-sm">
+                    Vehicle Type<span className="text-destructive">*</span>
+                  </Label>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select vehicle type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="car">Car</SelectItem>
+                        <SelectItem value="bike">Bike</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               rules={{ required: "Pickup Location is required" }}

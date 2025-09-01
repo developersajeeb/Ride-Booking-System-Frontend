@@ -52,6 +52,7 @@ export interface IRide {
   riderName: string;
   riderEmail: string;
   riderPhone?: string;
+  vehicleType: string;
   pickupLocation: string;
   destination: string;
   status: RideStatus;

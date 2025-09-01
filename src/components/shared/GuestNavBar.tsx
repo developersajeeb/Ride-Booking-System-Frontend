@@ -96,7 +96,7 @@ const GuestNavBar = () => {
 
                                 {data?.data?.email && (
                                     <>
-                                        <Link to={`${data?.data?.role === role.rider && '/rider' || data?.data?.role === role.admin && '/admin'}`} className='flex items-center gap-1 text-sm font-semibold text-[#004AAD] dark:text-blue-400 duration-300'><TbLayoutDashboard size={16} />Dashboard</Link>
+                                        <Link to={`${data?.data?.role === role.rider && '/rider' || data?.data?.role === role.driver && '/driver' || data?.data?.role === role.admin && '/admin'}`} className='flex items-center gap-1 text-sm font-semibold text-[#004AAD] dark:text-blue-400 duration-300'><TbLayoutDashboard size={16} />Dashboard</Link>
                                         <span className='w-[2px] h-9 bg-gray-300 dark:bg-gray-700 hidden lg:block'></span>
                                         <button className='flex items-center gap-1 text-sm font-semibold bg-gray-50 dark:bg-gray-800 text-gray-400 border border-gray-100 dark:border-gray-800 px-3 py-1 rounded-full duration-300 cursor-pointer' onClick={handleLogout}>Log Out <IoMdLogOut size={16} /></button>
                                     </>

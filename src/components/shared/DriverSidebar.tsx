@@ -13,17 +13,17 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { Link } from "react-router";
-import { riderSidebarMenus } from "@/routes/riderSidebarMenus";
+import { driverSidebarMenus } from "@/routes/driverSidebarMenus";
 import Logo from '../../assets/rideup-logo.png';
 import { IoMdLogOut } from "react-icons/io";
 import { authApi, useLogoutMutation } from "@/redux/features/auth/auth.api";
 import { useAppDispatch } from "@/redux/features/hook";
 
 const menuItems = {
-  navMain: riderSidebarMenus,
+  navMain: driverSidebarMenus,
 };
 
-export function RiderSidebar({
+export function DriverSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const [logout] = useLogoutMutation();
