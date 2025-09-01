@@ -1,10 +1,11 @@
-import React from 'react';
+
 
 const DriverDashboard = () => {
     return (
-        <div>
-            
-        </div>
+        <>
+            <section className="grid grid-cols-4">
+            </section>
+        </>
     );
 };
 

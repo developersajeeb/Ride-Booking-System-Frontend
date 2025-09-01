@@ -26,6 +26,7 @@ export const rideApi = baseApi.injectEndpoints({
         meta: response.data.meta,
       }),
     }),
+
     updateProfileInfo: builder.mutation({
       query: (userInfo) => ({
         url: "/user/update-my-profile",
@@ -34,6 +35,40 @@ export const rideApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["USER"],
     }),
+
+    allRides: builder.query({
+      query: () => ({
+        url: "/rides/all-rides-for-driver",
+        method: "GET",
+      }),
+      providesTags: ["RIDE"],
+    }),
+
+    respondToRideRequest: builder.mutation({
+      query: ({ rideId, response }: { rideId: string; response: "ACCEPTED" | "REJECTED" }) => ({
+        url: `/rides/${rideId}/respond`,
+        method: "PATCH",
+        data: { response },
+      }),
+      invalidatesTags: ["RIDE"],
+    }),
+
+    updateRideStatus: builder.mutation({
+      query: ({ rideId, status }: { rideId: string; status: "PICKED_UP" | "IN_TRANSIT" | "COMPLETED" }) => ({
+        url: `/rides/${rideId}/status`,
+        method: "PATCH",
+        data: { status },
+      }),
+      invalidatesTags: ["RIDE"],
+    }),
+
+    cancelRide: builder.mutation({
+      query: (rideId: string) => ({
+        url: `/rides/${rideId}/cancel`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["RIDE"],
+    }),
   }),
   overrideExisting: false,
 });
@@ -41,5 +76,9 @@ export const rideApi = baseApi.injectEndpoints({
 export const {
   useRequestRideMutation,
   useUserAllRidesQuery,
-  useUpdateProfileInfoMutation
+  useUpdateProfileInfoMutation,
+  useAllRidesQuery,
+  useRespondToRideRequestMutation,
+  useUpdateRideStatusMutation,
+  useCancelRideMutation,
 } = rideApi;

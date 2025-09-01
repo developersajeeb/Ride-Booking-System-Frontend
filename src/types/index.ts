@@ -42,6 +42,7 @@ export interface IErrorResponse {
 export type RideStatus =
   | "REQUESTED"
   | "ACCEPTED"
+  | "PICKED_UP"
   | "IN_PROGRESS"
   | "COMPLETED"
   | "CANCELLED";
