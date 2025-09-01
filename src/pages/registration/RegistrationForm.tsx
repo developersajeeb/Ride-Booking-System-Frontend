@@ -144,8 +144,8 @@ export function RegistrationForm({
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const result = await register(userInfo).unwrap();
+      console.log(result);
       toast.success("Account created successfully!");
       form.reset();
       navigate("/");

@@ -15,7 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/component
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAllRidesQuery, useCancelRideMutation, useUpdateRideStatusMutation } from "@/redux/features/ride/ride.api";
+import { useAllRidesQuery } from "@/redux/features/ride/ride.api";
 import type { IRide } from "@/types";
 import type { RideStatus } from "@/types";
 
@@ -32,8 +32,8 @@ const rideStatusSchema = z
 
 const IncomingRequests = () => {
     const { data, isLoading } = useAllRidesQuery(undefined);
-    const [updateRideStatus] = useUpdateRideStatusMutation();
-    const [cancelRide] = useCancelRideMutation();
+    // const [updateRideStatus] = useUpdateRideStatusMutation();
+    // const [cancelRide] = useCancelRideMutation();
     const greenStatuses: RideStatus[] = ["ACCEPTED", "PICKED_UP", "IN_PROGRESS", "COMPLETED"];
     console.log(data?.data);
 
@@ -44,18 +44,8 @@ const IncomingRequests = () => {
         },
     });
 
-    const onSubmit = async (formData: z.infer<typeof rideStatusSchema>, rideId: string) => {
-        try {
-            if (formData.status === "CANCELLED") {
-                await cancelRide(rideId);
-                console.log("Ride cancelled successfully");
-            } else {
-                await updateRideStatus({ rideId, status: formData.status as "ACCEPTED" | "PICKED_UP" | "IN_TRANSIT" | "COMPLETED" });
-                console.log("Ride status updated successfully");
-            }
-        } catch (error) {
-            console.error("Failed to update ride status:", error);
-        }
+    const onSubmit = (data: z.infer<typeof rideStatusSchema>) => {
+        console.log("Updated Ride Status:", data.status);
     };
 
     return (
@@ -93,7 +83,7 @@ const IncomingRequests = () => {
                                     ? "text-green-600"
                                     : "text-red-600"} text-sm`}>{ride?.status}</span>
                             </p>
-                            <form onSubmit={form.handleSubmit((data) => onSubmit(data, ride._id))}>
+                            <form onSubmit={form.handleSubmit(onSubmit)}>
                                 <FormField
                                     control={form.control}
                                     name="status"
