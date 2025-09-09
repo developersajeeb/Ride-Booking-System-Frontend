@@ -143,6 +143,7 @@ const RideRequestForm = () => {
     setIsLoginBtnLoading(true);
     if (!userData) {
       toast.error("Please login or signup to request a ride.");
+      setIsLoginBtnLoading(false);
       return
     }
 
@@ -162,6 +163,7 @@ const RideRequestForm = () => {
     } catch (error: any) {
       toast.error(error?.data?.message || "Something went wrong! Please try again.");
       console.error("Ride request error:", error);
+      setIsLoginBtnLoading(false);
     } finally {
       setIsLoginBtnLoading(false);
     }
